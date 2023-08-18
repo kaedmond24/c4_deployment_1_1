@@ -48,4 +48,42 @@
     ![deploy1_10](/images/deploy1_10.png)<br>
     ![deploy1_11](/images/deploy1_11.png)<br><br>
 
-## Troubleshooting
+---
+
+## Troubleshooting AWS Elastic Beanstalk Health Degradation
+
+- I've already identified a server-side error, 502 Error Bad Gateway, from the AWS EB web app link.<br><br>
+
+- The next step would be to check the server logs by Selecting last 100 lines and download logs<br><br>
+  ![deploy1_10](/images/deploy1_12.png)<br>
+  ![deploy1_11](/images/deploy1_13.png)<br><br>
+
+- After a quick review of the logs and I was able to find the following log message:<br><br>
+
+  > Aug 17 01:08:08 ip-172-31-14-228 web\[2687\]: ModuleNotFoundError: No module named 'application'<br><br>
+
+- The _ModuleNotFoundError_ is a python error notice signifying either a missing/uninstalled module that is unable to be imported into the application or an incorrect spelling of a module name. This error consequently is causing the failure of a server worker process which effectively crashes the application.<br><br>
+
+- To confirm the if the application configuration setup is correct I checked the AWS Elastic Beastalk documentation for Python Flask [here](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create-deploy-python-flask.html).<br><br>
+
+- According to the documentation,<br>
+
+> Using application.py as the filename and providing a callable application object (the Flask object, in this case) allows Elastic Beanstalk to easily find your application's code.<br><br>
+
+- This error can be fixed by reviewing the python app.py file and renaming the file to application.py. Moreover, an update to the test_app.py file needed. The test_app.py is dependent on the correct reference to the application.py file allowing for import and testing of the application.<br><br>
+  ![deploy1_11](/images/deploy1_14.png)<br>
+  ![deploy1_11](/images/deploy1_15.png)<br><br>
+
+- Once the issue was fixed, the updated file was saved and a new application deployment zip file (c4_deployment1_1_v2.zip) was created. All updates and fixes were commit and pushed to github followed by re-running the Jenkins build pipeline.<br><br>
+  ![deploy1_11](/images/deploy1_16.png)<br><br>
+
+- In the AWS Elastic Beanstalk service dashboard, the Upload and Deploy option was used to load the _c4_deployment1_1_v2.zip_ file.<br><br>
+  ![deploy1_11](/images/deploy1_17.png)<br>
+  ![deploy1_11](/images/deploy1_18.png)<br><br>
+
+- I attempted to restart the app server, however, I kept receiving the same error.<br><br>
+
+- Finally, I used the rebuild environment option. Once the environment was rebuilt, the application began to run successfully.<br><br>
+  ![deploy1_11](/images/deploy1_19.png)<br>
+  ![deploy1_11](/images/deploy1_20.png)<br>
+  ![deploy1_11](/images/deploy1_21.png)<br><br>
